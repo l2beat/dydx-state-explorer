@@ -163,6 +163,23 @@ export const POSITION_DETAILS_PROPS: PositionDetailsProps = {
     },
   ],
   transactions: createFakeTransactions(5),
+  pendingOffers: [
+    {
+      type: 'buy',
+      assetId: AssetId('ETH-9'),
+      amountSynthetic: 10000000n,
+      amountCollateral: 10000000n,
+    },
+    {
+      type: 'sell',
+      assetId: AssetId('ETH-9'),
+      amountSynthetic: 1000000n,
+      amountCollateral: 10000000n,
+      accepted: {
+        submissionExpirationTime: Timestamp(Date.now() + 5 * 3600 * 1000),
+      },
+    },
+  ],
 }
 
 export const POSITION_AT_UPDATE_PROPS: PositionAtUpdateProps = {

@@ -79,6 +79,7 @@ export class PositionController {
         }
       }),
       transactions: transactions.map(toForcedTransactionEntry),
+      pendingOffers: [], //TODO: implement
     })
     return { type: 'success', content }
   }

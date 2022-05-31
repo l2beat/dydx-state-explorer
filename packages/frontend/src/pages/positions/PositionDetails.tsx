@@ -14,6 +14,7 @@ import {
   formatHashLong,
   formatRelativeTime,
 } from '../formatting'
+import { PendingOffers } from './pending/offers'
 import { PositionDetailsProps } from './PositionDetailsProps'
 
 const balanceTableColumns = (ownedByYou: boolean) => {
@@ -139,6 +140,7 @@ export function PositionDetails({
   history,
   transactions,
   account,
+  pendingOffers,
 }: PositionDetailsProps) {
   const ownedByYou = ethAddress === account
   return (
@@ -161,6 +163,9 @@ export function PositionDetails({
           </span>
         )}
       </div>
+      {pendingOffers.length > 0 && (
+        <PendingOffers offers={pendingOffers} ownedByYou={ownedByYou} />
+      )}
       <div className="mb-1.5 font-medium text-lg text-left">Stats</div>
       <PageHeaderStats
         rows={[
