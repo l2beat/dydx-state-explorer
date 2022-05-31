@@ -59,7 +59,7 @@ export class EthereumClient {
     return await this.provider.getTransactionReceipt(transactionHash.toString())
   }
 
-  onBlock(handler: (block: providers.Block) => void) {
+  onBlock(handler: (block: providers.Block | number) => void) {
     this.provider.on('block', handler)
     return () => {
       this.provider.off('block', handler)

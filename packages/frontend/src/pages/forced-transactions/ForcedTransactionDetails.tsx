@@ -2,6 +2,7 @@ import { AssetId } from '@explorer/types'
 import React from 'react'
 
 import { Page } from '../common'
+import { EtherscanLink } from '../common/EtherscanLink'
 import { ForcedHistory } from '../common/ForcedHistory'
 import { ForcedPageHeader } from '../common/ForcedPageHeader'
 import { PageHeaderStats } from '../common/PageHeaderStats'
@@ -26,7 +27,13 @@ function toStatsRows(transaction: ForcedTransaction) {
       },
       {
         title: 'Ethereum address',
-        content: transaction.data.ethereumAddress?.toString() || '-',
+        content: transaction.data.ethereumAddress ? (
+          <EtherscanLink address={transaction.data.ethereumAddress}>
+            {transaction.data.ethereumAddress}
+          </EtherscanLink>
+        ) : (
+          '-'
+        ),
       },
       {
         title: 'Value',
@@ -34,7 +41,11 @@ function toStatsRows(transaction: ForcedTransaction) {
       },
       {
         title: 'Transaction hash',
-        content: formatHashLong(transaction.data.transactionHash),
+        content: (
+          <EtherscanLink transaction={transaction.data.transactionHash}>
+            {formatHashLong(transaction.data.transactionHash)}
+          </EtherscanLink>
+        ),
       },
       {
         title: 'State update id',
@@ -52,8 +63,12 @@ function toStatsRows(transaction: ForcedTransaction) {
   return [
     ...toOfferStatsRows({ type: transaction.type, ...transaction.data }),
     {
-      title: `Transaction hash`,
-      content: transaction.data.transactionHash.toString(),
+      title: 'Transaction hash',
+      content: (
+        <EtherscanLink transaction={transaction.data.transactionHash}>
+          {formatHashLong(transaction.data.transactionHash)}
+        </EtherscanLink>
+      ),
     },
   ]
 }

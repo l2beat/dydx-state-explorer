@@ -1,4 +1,5 @@
 import { initMetamask } from './metamask'
+import { initAcceptOfferForm } from './offer/acceptForm'
 import { initOffersFilteringForm } from './offer/filteringForm'
 import { initPagination } from './pagination'
 import { initTransactionForm } from './transaction/transactionForm'
@@ -9,3 +10,4 @@ initMetamask()
 initPagination()
 initTransactionForm()
 initOffersFilteringForm()
+initAcceptOfferForm()

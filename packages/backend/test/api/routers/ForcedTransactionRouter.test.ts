@@ -51,7 +51,7 @@ describe('ForcedTransactionRouter', () => {
     })
   })
 
-  describe('/forced/offers/:initialOfferId', () => {
+  describe('/forced/offers/:offerId/accept', () => {
     it('returns success', async () => {
       await createServer(
         mock<ForcedTradeOfferController>({
@@ -62,7 +62,7 @@ describe('ForcedTransactionRouter', () => {
         }),
         mock<TransactionSubmitController>()
       )
-        .put('/forced/offers/1')
+        .post('/forced/offers/1/accept')
         .send(acceptedData)
         .expect(200)
     })
@@ -76,7 +76,7 @@ describe('ForcedTransactionRouter', () => {
         }),
         mock<TransactionSubmitController>()
       )
-        .put('/forced/offers/1')
+        .post('/forced/offers/1/accept')
         .send(acceptedData)
         .expect(404)
     })

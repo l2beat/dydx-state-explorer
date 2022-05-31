@@ -266,7 +266,7 @@ export const FORCED_TRADE_OFFER_DETAILS_PROPS: ForcedTradeOfferDetailsProps = {
     addressA: EthereumAddress.fake(),
     amountCollateral: 10n,
     amountSynthetic: 100n,
-    assetId: AssetId('BTC-10'),
+    syntheticAssetId: AssetId('BTC-10'),
     id: 1,
     positionIdA: 1n,
     type: 'buy',

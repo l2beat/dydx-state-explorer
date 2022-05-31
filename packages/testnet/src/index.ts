@@ -1,15 +1,15 @@
-import { AssetId, Timestamp } from '@explorer/types'
+import { decodeAssetId } from '@explorer/encoding'
+import { AssetId, EthereumAddress, StarkKey } from '@explorer/types'
 
 import {
-  ALICE_POSITION,
-  ALICE_STARK_KEY,
-  BOB_POSITION,
-  BOB_STARK_KEY,
-  CHARLIE_STARK_KEY,
-} from './constants'
+  LogForcedTradeRequestEventObject,
+  LogForcedWithdrawalRequestEventObject,
+} from '../build/typechain/Perpetual'
+import { ALICE_STARK_KEY, BOB_STARK_KEY, CHARLIE_STARK_KEY } from './constants'
 import { deployContracts } from './deployContracts'
 import { setupGanache } from './setupGanache'
 import { setupWallets } from './setupWallets'
+import { Simulation } from './Simulation'
 import { StateUpdater } from './StateUpdater'
 
 main()
@@ -20,60 +20,59 @@ async function main() {
 
   console.log('Deployed contracts')
 
-  await contracts.perpetual.registerUser(wallets.alice.address, ALICE_STARK_KEY)
-  await contracts.perpetual.registerUser(wallets.bob.address, BOB_STARK_KEY)
-  await contracts.perpetual.registerUser(
-    wallets.charlie.address,
+  const stateUpdater = new StateUpdater(contracts)
+  await stateUpdater.init()
+  const simulation = new Simulation(stateUpdater, [
+    { assetId: AssetId('ETH-9'), priceUSDCents: 1_786_96n },
+    { assetId: AssetId('BTC-10'), priceUSDCents: 28_967_70n },
+    { assetId: AssetId('1INCH-7'), priceUSDCents: 92n },
+    { assetId: AssetId('AAVE-8'), priceUSDCents: 93_41n },
+    { assetId: AssetId('CRV-6'), priceUSDCents: 1_27n },
+    { assetId: AssetId('DOGE-5'), priceUSDCents: 8n },
+    { assetId: AssetId('LINK-7'), priceUSDCents: 6_50n },
+    { assetId: AssetId('SOL-7'), priceUSDCents: 42_11n },
+  ])
+
+  contracts.perpetual.on('LogForcedWithdrawalRequest', (_1, _2, _3, event) => {
+    const args: LogForcedWithdrawalRequestEventObject = event.args
+    simulation.queueForcedAction({
+      type: 'withdrawal',
+      amount: args.quantizedAmount.toBigInt(),
+      positionId: args.vaultId.toBigInt(),
+      publicKey: StarkKey.from(args.starkKey),
+    })
+  })
+
+  contracts.perpetual.on('LogForcedTradeRequest', (_1, _2, _3, event) => {
+    const args: LogForcedTradeRequestEventObject = event.args
+    simulation.queueForcedAction({
+      type: 'trade',
+      positionIdA: args.vaultIdA.toBigInt(),
+      publicKeyA: StarkKey.from(args.starkKeyA),
+      positionIdB: args.vaultIdB.toBigInt(),
+      publicKeyB: StarkKey.from(args.starkKeyB),
+      collateralAmount: args.amountCollateral.toBigInt(),
+      syntheticAmount: args.amountSynthetic.toBigInt(),
+      isABuyingSynthetic: args.aIsBuyingSynthetic,
+      syntheticAssetId: decodeAssetId(
+        args.syntheticAssetId.toHexString().slice(0, 2)
+      ),
+      nonce: args.nonce.toBigInt(),
+    })
+  })
+
+  await simulation.addUser(
+    EthereumAddress(wallets.alice.address),
+    ALICE_STARK_KEY
+  )
+  await simulation.addUser(EthereumAddress(wallets.bob.address), BOB_STARK_KEY)
+  await simulation.addUser(
+    EthereumAddress(wallets.charlie.address),
     CHARLIE_STARK_KEY
   )
 
-  console.log('Registered users')
-
-  const stateUpdater = new StateUpdater(contracts)
-  await stateUpdater.init()
-
-  console.log('Initialized state')
-
-  await stateUpdater.update({
-    funding: [
-      {
-        indices: [],
-        timestamp: Timestamp.fromSeconds(100),
-      },
-    ],
-    positions: [
-      {
-        positionId: ALICE_POSITION,
-        collateralBalance: 20000n * 10n ** 6n,
-        fundingTimestamp: Timestamp.fromSeconds(100),
-        publicKey: ALICE_STARK_KEY,
-        balances: [],
-      },
-    ],
-  })
-
-  await stateUpdater.update({
-    funding: [
-      {
-        indices: [{ assetId: AssetId('BTC-10'), value: 1234n }],
-        timestamp: Timestamp.fromSeconds(200),
-      },
-    ],
-    positions: [
-      {
-        positionId: ALICE_POSITION,
-        collateralBalance: 30000n * 10n ** 6n,
-        fundingTimestamp: Timestamp.fromSeconds(200),
-        publicKey: ALICE_STARK_KEY,
-        balances: [],
-      },
-      {
-        positionId: BOB_POSITION,
-        collateralBalance: 10000n * 10n ** 6n,
-        fundingTimestamp: Timestamp.fromSeconds(200),
-        publicKey: BOB_STARK_KEY,
-        balances: [{ assetId: AssetId('BTC-10'), balance: 123456789n }],
-      },
-    ],
-  })
+  await simulation.update()
+  setInterval(async () => {
+    await simulation.update()
+  }, 60 * 1000)
 }

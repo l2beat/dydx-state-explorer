@@ -75,7 +75,7 @@ async function submitOffer(state: FormState) {
   })
     .then((res) => res.json())
     .then((res) => {
-      window.location.href = `/forced/${res.id}`
+      window.location.href = `/forced/offers/${res.id}`
     })
     .catch(console.error)
 }

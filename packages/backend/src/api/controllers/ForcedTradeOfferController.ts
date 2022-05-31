@@ -13,7 +13,7 @@ import { PositionRepository } from '../../peripherals/database/PositionRepositor
 import { UserRegistrationEventRepository } from '../../peripherals/database/UserRegistrationEventRepository'
 import { ControllerResult } from './ControllerResult'
 import {
-  validateAccept,
+  validateAcceptSignature,
   validateCancel,
   validateCreate,
 } from './utils/ForcedTradeOfferValidators'
@@ -61,6 +61,38 @@ export class ForcedTradeOfferController {
     return { type: 'success', content }
   }
 
+  private async getAcceptFormData(
+    offer: ForcedTradeOfferRecord,
+    account: EthereumAddress
+  ) {
+    const [userPositionId, userEvent] = await Promise.all([
+      this.positionRepository.findIdByEthereumAddress(account),
+      this.userRegistrationEventRepository.findByEthereumAddress(account),
+    ])
+    const isAcceptable = !offer.accepted && !offer.cancelledAt
+    const shouldRenderForm =
+      userEvent &&
+      isAcceptable &&
+      userPositionId &&
+      userPositionId !== offer.positionIdA
+    const submissionExpirationTime = BigInt(
+      Math.floor((Date.now() + 3 * 24 * 60 * 60 * 1000) / (60 * 60 * 1000))
+    )
+    if (!shouldRenderForm) {
+      return undefined
+    }
+    return {
+      nonce: BigInt(Date.now()),
+      positionIdB: userPositionId,
+      premiumCost: false,
+      starkKeyA: offer.starkKeyA,
+      starkKeyB: userEvent.starkKey,
+      submissionExpirationTime,
+      aIsBuyingSynthetic: offer.aIsBuyingSynthetic,
+      address: userEvent.ethAddress,
+    }
+  }
+
   async getOfferDetailsPage(
     id: number,
     account: EthereumAddress | undefined
@@ -72,17 +104,18 @@ export class ForcedTradeOfferController {
         content: 'Offer not found.',
       }
     }
-    const userA = await this.userRegistrationEventRepository.findByStarkKey(
-      offer.starkKeyA
-    )
+
+    const [userA, userB] = await Promise.all([
+      this.userRegistrationEventRepository.findByStarkKey(offer.starkKeyA),
+      offer.accepted
+        ? this.userRegistrationEventRepository.findByStarkKey(
+            offer.accepted.starkKeyB
+          )
+        : undefined,
+    ])
     if (!userA) {
       throw new Error('User A not found')
     }
-    const userB = offer.accepted
-      ? await this.userRegistrationEventRepository.findByStarkKey(
-          offer.accepted.starkKeyB
-        )
-      : undefined
 
     const content = renderForcedTradeOfferDetailsPage({
       account,
@@ -94,10 +127,11 @@ export class ForcedTradeOfferController {
         positionIdA: offer.positionIdA,
         amountCollateral: offer.amountCollateral,
         amountSynthetic: offer.amountSynthetic,
-        assetId: offer.syntheticAssetId,
+        syntheticAssetId: offer.syntheticAssetId,
         positionIdB: offer.accepted?.positionIdB,
         addressB: userB?.ethAddress,
       },
+      acceptForm: account && (await this.getAcceptFormData(offer, account)),
     })
     return { type: 'success', content }
   }
@@ -161,14 +195,13 @@ export class ForcedTradeOfferController {
         content: 'Offer already cancelled.',
       }
     }
-    const requestValid = validateAccept(
+    const signatureValid = validateAcceptSignature(
       offer,
       accepted,
-      positionB,
       userB.ethAddress
     )
-    if (!requestValid) {
-      return { type: 'bad request', content: 'Your offer is invalid.' }
+    if (!signatureValid) {
+      return { type: 'bad request', content: 'Invalid signature.' }
     }
 
     await this.offerRepository.save({

@@ -25,7 +25,7 @@ export function TableRow(props: TableRowProps) {
           <td
             key={col}
             className={cx(
-              'px-1.5 py-0.5',
+              !props.link && 'px-1.5 py-0.5',
               'first-letter:capitalize',
               (numeric || monospace) && 'font-mono',
               numeric ? 'text-right' : 'text-left',
@@ -33,7 +33,16 @@ export function TableRow(props: TableRowProps) {
               props.link && 'cursor-pointer'
             )}
           >
-            {props.link ? <a href={props.link}>{cell}</a> : cell}
+            {props.link ? (
+              <a
+                className="px-1.5 py-0.5 block w-full truncate"
+                href={props.link}
+              >
+                {cell}
+              </a>
+            ) : (
+              cell
+            )}
           </td>
         )
       })}

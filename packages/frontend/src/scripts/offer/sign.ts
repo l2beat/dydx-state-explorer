@@ -1,12 +1,11 @@
 import {
+  AcceptedData,
   CreateOfferData,
   toSignableAcceptOffer,
   toSignableCancelOffer,
   toSignableCreateOffer,
 } from '@explorer/shared'
 import { EthereumAddress } from '@explorer/types'
-
-import { AcceptedData } from './types'
 
 async function sign(
   method: 'personal_sign' | 'eth_sign',

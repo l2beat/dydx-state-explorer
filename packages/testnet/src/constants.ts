@@ -8,20 +8,17 @@ export const ALICE_PK =
 export const ALICE_STARK_KEY = StarkKey(
   '0a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a1a'
 )
-export const ALICE_POSITION = 69n
 
 export const BOB_PK =
   '0x89799382ccb9177adb9d1c7a0e2c75e36c51a329a31f34e2f27481a97e292dde'
 export const BOB_STARK_KEY = StarkKey(
   '0b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b'
 )
-export const BOB_POSITION = 420n
 
 export const CHARLIE_PK =
   '0x6a0bcfc4dab6ebd6c5b2333cd2bf42c1a0cafabf21136aadcfa04896249c9c0c'
 export const CHARLIE_STARK_KEY = StarkKey(
   '0c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c3c'
 )
-export const CHARLIE_POSITION = 1337n
 
 export const PRIVATE_KEYS = [DEPLOYER_PK, ALICE_PK, BOB_PK, CHARLIE_PK]

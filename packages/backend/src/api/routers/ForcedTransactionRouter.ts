@@ -35,17 +35,17 @@ export function createForcedTransactionRouter(
     )
   )
 
-  router.put(
-    '/forced/offers/:initialOfferId',
+  router.post(
+    '/forced/offers/:offerId/accept',
     bodyParser(),
     withTypedContext(
       z.object({
-        params: z.object({ initialOfferId: stringAsInt() }),
+        params: z.object({ offerId: stringAsInt() }),
         request: z.object({ body: AcceptOfferBody }),
       }),
       async (ctx) => {
         const result = await offerController.acceptOffer(
-          ctx.params.initialOfferId,
+          ctx.params.offerId,
           ctx.request.body
         )
         applyControllerResult(ctx, result)

@@ -21,7 +21,10 @@
     "ganache": "^7.2.0"
   },
   "devDependencies": {
-    "@ethereum-waffle/compiler": "^3.4.4",
-    "prettier-plugin-solidity": "^1.0.0-beta.19"
+    "@ethereum-waffle/compiler": "^4.0.0-alpha.21",
+    "@typechain/ethers-v5": "^10.0.0",
+    "prettier-plugin-solidity": "^1.0.0-beta.19",
+    "solc": "^0.8.14-fixed",
+    "typechain": "^8.0.0"
   }
 }

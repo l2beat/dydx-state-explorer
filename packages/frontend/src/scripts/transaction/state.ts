@@ -250,6 +250,13 @@ function stateFromAmountAndTotal(
 function withChecks(state: FormState): FormState {
   const balance = state.selectedAsset.balance
   const absolute = balance < 0 ? -balance : balance
+  if (state.selectedAsset.assetId === AssetId.USDC && balance < 0) {
+    return {
+      ...state,
+      amountInputError: true,
+      canSubmit: false,
+    }
+  }
   if (state.amountInputValue > absolute) {
     return {
       ...state,

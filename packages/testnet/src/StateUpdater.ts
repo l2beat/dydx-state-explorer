@@ -1,22 +1,36 @@
-import { encodeOnChainData, OnChainData, State } from '@explorer/encoding'
 import {
-  InMemoryRollupStorage,
-  OnChainUpdate,
-  RollupState,
-} from '@explorer/state'
-import { AssetId, Hash256, PedersenHash, Timestamp } from '@explorer/types'
+  encodeOnChainData,
+  ForcedAction,
+  FundingEntry,
+  OnChainData,
+  OraclePrice,
+  PositionUpdate,
+  State,
+} from '@explorer/encoding'
+import { InMemoryRollupStorage, RollupState } from '@explorer/state'
+import {
+  EthereumAddress,
+  Hash256,
+  PedersenHash,
+  StarkKey,
+  Timestamp,
+} from '@explorer/types'
 import { solidityKeccak256 } from 'ethers/lib/utils'
 
 import { Contracts } from './deployContracts'
+
+export interface UpdateData {
+  funding: FundingEntry[]
+  positions: PositionUpdate[]
+  forcedActions: ForcedAction[]
+  prices: OraclePrice[]
+}
 
 export class StateUpdater {
   rollup?: RollupState
   lastState: State = {
     indices: [],
-    oraclePrices: [
-      { assetId: AssetId('ETH-9'), price: 11401806731n },
-      { assetId: AssetId('BTC-10'), price: 16622299667n },
-    ],
+    oraclePrices: [],
     orderHeight: 64,
     orderRoot: PedersenHash.fake(),
     positionHeight: 64,
@@ -33,18 +47,30 @@ export class StateUpdater {
     this.lastState.positionRoot = await this.rollup.positions.hash()
   }
 
-  async update(data: OnChainUpdate) {
+  async registerUser(address: EthereumAddress, starkKey: StarkKey) {
+    await this.contracts.perpetual.registerUser(
+      address.toString(),
+      starkKey.toString()
+    )
+    console.log(`Registered ${address} as ${starkKey}`)
+  }
+
+  async update(updateData: UpdateData) {
     if (!this.rollup) {
       throw new Error('Not initialized!')
     }
 
-    const [nextRollup] = await this.rollup.update(data)
+    const [nextRollup] = await this.rollup.update({
+      funding: updateData.funding,
+      positions: updateData.positions,
+    })
     this.rollup = nextRollup
     const afterRoot = await this.rollup.positions.hash()
 
+    const oldState = this.lastState
     const newState: State = {
       indices: [],
-      oraclePrices: this.lastState.oraclePrices,
+      oraclePrices: updateData.prices,
       orderHeight: 64,
       orderRoot: PedersenHash.fake(),
       positionHeight: 64,
@@ -52,25 +78,29 @@ export class StateUpdater {
       timestamp: Timestamp(Date.now()),
       systemTime: Timestamp(Date.now()),
     }
+    this.lastState = newState
 
     const onChainData: OnChainData = {
       assetConfigHashes: [],
       conditions: [],
       configurationHash: Hash256.fake(),
-      forcedActions: [],
+      forcedActions: updateData.forcedActions,
       minimumExpirationTimestamp: 1n,
       modifications: [],
-      oldState: this.lastState,
+      oldState,
       newState,
-      ...data,
+      funding: updateData.funding,
+      positions: updateData.positions,
     }
 
-    this.lastState = newState
+    await this.performStateTransition(onChainData)
+  }
 
-    const encoded = encodeOnChainData(onChainData)
+  private async performStateTransition(onChainData: OnChainData) {
+    const pages = encodeOnChainData(onChainData)
 
     const pageHashes: string[] = []
-    for (const [i, page] of encoded.entries()) {
+    for (const [i, page] of pages.entries()) {
       const values: bigint[] = []
       for (let i = 0; i < page.length / 2 / 32; i++) {
         values.push(BigInt('0x' + page.slice(64 * i, 64 * (i + 1))))
@@ -85,7 +115,7 @@ export class StateUpdater {
         0,
         0
       )
-      console.log(`Registered memory page ${i} of ${encoded.length} ${hash}`)
+      console.log(`Registered memory page ${i} of ${pages.length} ${hash}`)
     }
 
     const stateTransitionFact = '0x' + PedersenHash.fake()

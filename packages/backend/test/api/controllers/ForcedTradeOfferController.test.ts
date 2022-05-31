@@ -262,7 +262,7 @@ describe(ForcedTradeOfferController.name, async () => {
       })
     })
 
-    it('blocks invalid balance', async () => {
+    it('blocks invalid signature', async () => {
       const id = 1
       const controller = new ForcedTradeOfferController(
         mock<ForcedTradeOfferRepository>({
@@ -295,9 +295,14 @@ describe(ForcedTradeOfferController.name, async () => {
         })
       )
 
-      expect(await controller.acceptOffer(id, tradeMock.accepted)).toEqual({
+      expect(
+        await controller.acceptOffer(id, {
+          ...tradeMock.accepted,
+          signature: 'invalid',
+        })
+      ).toEqual({
         type: 'bad request',
-        content: 'Your offer is invalid.',
+        content: 'Invalid signature.',
       })
     })
 

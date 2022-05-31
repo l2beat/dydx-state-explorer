@@ -1,9 +1,9 @@
 import React from 'react'
 
 import { AssetCell } from '../common/AssetCell'
+import { EtherscanLink } from '../common/EtherscanLink'
 import { Page } from '../common/Page'
 import { PageHeaderStats } from '../common/PageHeaderStats'
-import { SimpleLink } from '../common/SimpleLink'
 import { ClientPaginatedTable } from '../common/table'
 import {
   formatAbsoluteTime,
@@ -49,7 +49,9 @@ export function StateUpdateDetails({
           },
           {
             title: 'Ethereum block number',
-            content: <SimpleLink href="/">{blockNumber.toString()}</SimpleLink>,
+            content: (
+              <EtherscanLink block={blockNumber}>{blockNumber}</EtherscanLink>
+            ),
           },
           {
             title: 'Timestamp',

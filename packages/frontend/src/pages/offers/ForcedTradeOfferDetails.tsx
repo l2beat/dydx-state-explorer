@@ -2,11 +2,13 @@ import { AssetId, EthereumAddress } from '@explorer/types'
 import React from 'react'
 
 import { Page } from '../common'
+import { EtherscanLink } from '../common/EtherscanLink'
 import { ForcedHistory } from '../common/ForcedHistory'
 import { ForcedPageHeader } from '../common/ForcedPageHeader'
 import { PageHeaderStats } from '../common/PageHeaderStats'
 import { SimpleLink } from '../common/SimpleLink'
 import { formatCurrency } from '../formatting'
+import { AcceptOfferForm } from './accept-form/AcceptOfferForm'
 import { ForcedTradeOfferDetailsProps } from './ForcedTradeOfferDetailsProps'
 
 export function toStatsRows(
@@ -28,11 +30,15 @@ export function toStatsRows(
     },
     {
       title: `${partyA} ethereum address`,
-      content: offer.addressA?.toString() || '-',
+      content: offer.addressA ? (
+        <EtherscanLink address={offer.addressA}>{offer.addressA}</EtherscanLink>
+      ) : (
+        '-'
+      ),
     },
     {
       title: 'Tokens sold',
-      content: formatCurrency(offer.amountSynthetic, offer.assetId),
+      content: formatCurrency(offer.amountSynthetic, offer.syntheticAssetId),
     },
     {
       title: 'Value received',
@@ -54,7 +60,11 @@ export function toStatsRows(
   if (offer.addressB) {
     rows.push({
       title: `${partyB} ethereum address`,
-      content: offer.addressB.toString(),
+      content: offer.addressB ? (
+        <EtherscanLink address={offer.addressB}>{offer.addressB}</EtherscanLink>
+      ) : (
+        '-'
+      ),
     })
   }
 
@@ -65,8 +75,8 @@ export function ForcedTradeOfferDetails({
   account,
   offer,
   history,
+  acceptForm,
 }: ForcedTradeOfferDetailsProps) {
-  const shouldRenderAccept = account !== offer.addressA && !offer.addressB
   return (
     <Page
       title="L2BEAT dYdX Explorer"
@@ -78,11 +88,7 @@ export function ForcedTradeOfferDetails({
       account={account}
     >
       <ForcedPageHeader displayId={offer.id} type={offer.type}>
-        {shouldRenderAccept && (
-          <button className="bg-blue-100 text-white float-right px-4 py-2 text-base rounded-md">
-            Accept {`& ${offer.type === 'buy' ? 'sell' : 'buy'}`}
-          </button>
-        )}
+        {acceptForm && <AcceptOfferForm {...offer} {...acceptForm} />}
       </ForcedPageHeader>
       <div className="mb-1.5 font-medium text-lg text-left">Stats</div>
       <PageHeaderStats rows={toStatsRows(offer)} />

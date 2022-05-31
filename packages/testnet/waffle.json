@@ -2,5 +2,7 @@
   "compilerType": "solcjs",
   "compilerVersion": "0.6.12",
   "sourceDirectory": "./contracts",
-  "outputDirectory": "./build"
+  "outputDirectory": "./build",
+  "typechainEnabled": true,
+  "typechainOutputDir": "typechain"
 }

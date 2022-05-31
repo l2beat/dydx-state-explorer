@@ -54,7 +54,8 @@ export class BlockDownloader {
     }
 
     return this.ethereumClient.onBlock((block) => {
-      for (let i = this.queueTip + 1; i <= block.number; i++) {
+      const blockNumber = typeof block === 'number' ? block : block.number
+      for (let i = this.queueTip + 1; i <= blockNumber; i++) {
         this.addJob(i)
         this.queueTip = i
       }

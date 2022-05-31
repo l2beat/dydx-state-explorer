@@ -4,7 +4,7 @@ import {
   renderForcedTransactionsIndexPage,
   renderTransactionForm,
 } from '@explorer/frontend'
-import { EthereumAddress, Hash256 } from '@explorer/types'
+import { AssetId, EthereumAddress, Hash256 } from '@explorer/types'
 
 import {
   ForcedTransactionRecord,
@@ -82,7 +82,7 @@ export class ForcedTransactionController {
         addressB: userB?.ethAddress,
         amountSynthetic: transaction.data.syntheticAmount,
         amountCollateral: transaction.data.collateralAmount,
-        assetId: transaction.data.syntheticAssetId,
+        syntheticAssetId: transaction.data.syntheticAssetId,
         transactionHash: transaction.hash,
       },
     }
@@ -129,7 +129,12 @@ export class ForcedTransactionController {
       position.prices
     )
 
-    if (assets.length === 0) {
+    if (
+      assets.length === 0 ||
+      (assets.length === 1 &&
+        assets[0].assetId === AssetId.USDC &&
+        assets[0].balance < 0n)
+    ) {
       return { type: 'redirect', url: '/' }
     }
 
