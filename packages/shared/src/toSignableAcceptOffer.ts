@@ -2,21 +2,18 @@ import { keccak256, pack } from '@ethersproject/solidity'
 import { encodeAssetId } from '@explorer/encoding'
 import { AssetId, StarkKey } from '@explorer/types'
 
+import { CreateOfferData } from './toSignableCreateOffer'
+
+export type AcceptedOfferData = {
+  starkKeyB: StarkKey
+  positionIdB: bigint
+  nonce: bigint
+  submissionExpirationTime: bigint
+}
+
 export function toSignableAcceptOffer(
-  offer: {
-    starkKeyA: StarkKey
-    positionIdA: bigint
-    syntheticAssetId: AssetId
-    amountCollateral: bigint
-    amountSynthetic: bigint
-    aIsBuyingSynthetic: boolean
-  },
-  accepted: {
-    starkKeyB: StarkKey
-    positionIdB: bigint
-    nonce: bigint
-    submissionExpirationTime: bigint
-  }
+  offer: CreateOfferData,
+  accepted: AcceptedOfferData
 ) {
   const packedParameters = pack(
     [
