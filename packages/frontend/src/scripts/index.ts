@@ -1,3 +1,4 @@
+import { initCountdownTimer } from './countdownTimer'
 import { initMetamask } from './metamask'
 import { initAcceptOfferForm } from './offer/acceptForm'
 import { initOffersFilteringForm } from './offer/filteringForm'
@@ -11,3 +12,4 @@ initPagination()
 initTransactionForm()
 initOffersFilteringForm()
 initAcceptOfferForm()
+initCountdownTimer()
