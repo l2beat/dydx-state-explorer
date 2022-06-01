@@ -13,3 +13,7 @@ export function Timestamp(milliseconds: number | bigint) {
 Timestamp.fromSeconds = function fromSeconds(seconds: number | bigint) {
   return Timestamp(Number(seconds) * 1000)
 }
+
+Timestamp.fromHours = function fromHours(hours: number | bigint) {
+  return Timestamp(Number(hours) * 1000 * 3600)
+}

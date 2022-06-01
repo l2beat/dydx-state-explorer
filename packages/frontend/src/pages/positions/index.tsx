@@ -6,6 +6,7 @@ import { PositionAtUpdateProps } from './PositionAtUpdateProps'
 import { PositionDetails } from './PositionDetails'
 import { PositionDetailsProps } from './PositionDetailsProps'
 
+export * from './pending/offers'
 export * from './PositionAtUpdateProps'
 export * from './PositionDetailsProps'
 

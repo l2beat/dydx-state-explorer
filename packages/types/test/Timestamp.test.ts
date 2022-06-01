@@ -24,4 +24,13 @@ describe(Timestamp.name, () => {
       expect(+Timestamp.fromSeconds(10_000_000)).toEqual(10_000_000_000)
     })
   })
+
+  describe(Timestamp.fromHours.name, () => {
+    it('can be created from bigint', () => {
+      expect(+Timestamp.fromHours(1n)).toEqual(3600_000)
+    })
+    it('can be created from integer', () => {
+      expect(+Timestamp.fromHours(1)).toEqual(3600_000)
+    })
+  })
 })

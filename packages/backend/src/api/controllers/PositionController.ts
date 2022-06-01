@@ -4,6 +4,7 @@ import {
 } from '@explorer/frontend'
 import { EthereumAddress } from '@explorer/types'
 
+import { ForcedTradeOfferRepository } from '../../peripherals/database/ForcedTradeOfferRepository'
 import { ForcedTransactionsRepository } from '../../peripherals/database/ForcedTransactionsRepository'
 import { PositionRepository } from '../../peripherals/database/PositionRepository'
 import { StateUpdateRepository } from '../../peripherals/database/StateUpdateRepository'
@@ -18,16 +19,18 @@ export class PositionController {
     private stateUpdateRepository: StateUpdateRepository,
     private positionRepository: PositionRepository,
     private userRegistrationEventRepository: UserRegistrationEventRepository,
-    private forcedTransactionsRepository: ForcedTransactionsRepository
+    private forcedTransactionsRepository: ForcedTransactionsRepository,
+    private forcedTradeOfferRepository: ForcedTradeOfferRepository
   ) {}
 
   async getPositionDetailsPage(
     positionId: bigint,
     account: EthereumAddress | undefined
   ): Promise<ControllerResult> {
-    const [history, transactions] = await Promise.all([
+    const [history, transactions, pendingOffers] = await Promise.all([
       this.positionRepository.getHistoryById(positionId),
       this.forcedTransactionsRepository.getAffectingPosition(positionId),
+      this.forcedTradeOfferRepository.getPendingByPositionIdA(positionId),
     ])
 
     if (!history[0]) {
@@ -79,7 +82,10 @@ export class PositionController {
         }
       }),
       transactions: transactions.map(toForcedTransactionEntry),
-      pendingOffers: [], //TODO: implement
+      pendingOffers: pendingOffers.map((offer) => ({
+        ...offer,
+        type: offer.aIsBuyingSynthetic ? 'buy' : 'sell',
+      })),
     })
     return { type: 'success', content }
   }

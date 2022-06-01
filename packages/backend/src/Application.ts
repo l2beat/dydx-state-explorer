@@ -176,7 +176,8 @@ export class Application {
       stateUpdateRepository,
       positionRepository,
       userRegistrationEventRepository,
-      forcedTransactionsRepository
+      forcedTransactionsRepository,
+      forcedTradeOfferRepository
     )
     const homeController = new HomeController(
       stateUpdateRepository,
