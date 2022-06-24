@@ -10,6 +10,7 @@ import { StateTransitionFactRecord } from '../peripherals/database/StateTransiti
 import { StateUpdateRepository } from '../peripherals/database/StateUpdateRepository'
 import { EthereumClient } from '../peripherals/ethereum/EthereumClient'
 import { BlockNumber } from '../peripherals/ethereum/types'
+import { Logger } from '../tools/Logger'
 
 /**
  * @internal
@@ -32,6 +33,7 @@ export class StateUpdateCollector {
     private readonly rollupStateRepository: RollupStateRepository,
     private readonly ethereumClient: EthereumClient,
     private readonly forcedTransactionsRepository: ForcedTransactionsRepository,
+    private readonly logger: Logger,
     private rollupState?: RollupState
   ) {}
 
@@ -102,6 +104,7 @@ export class StateUpdateCollector {
         transactionHashes,
       }),
     ])
+    this.logger.info('State updated', { id, blockNumber })
   }
 
   async extractTransactionHashes(

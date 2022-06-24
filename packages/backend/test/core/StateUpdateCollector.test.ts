@@ -18,6 +18,7 @@ import type { PageRepository } from '../../src/peripherals/database/PageReposito
 import type { RollupStateRepository } from '../../src/peripherals/database/RollupStateRepository'
 import { StateUpdateRepository } from '../../src/peripherals/database/StateUpdateRepository'
 import type { EthereumClient } from '../../src/peripherals/ethereum/EthereumClient'
+import { Logger } from '../../src/tools/Logger'
 import { mock } from '../mock'
 
 describe(StateUpdateCollector.name, () => {
@@ -31,7 +32,8 @@ describe(StateUpdateCollector.name, () => {
         mock<StateUpdateRepository>(),
         rollupStateRepository,
         mock<EthereumClient>(),
-        mock<ForcedTransactionsRepository>()
+        mock<ForcedTransactionsRepository>(),
+        Logger.SILENT
       )
       // ROLLUP_STATE_EMPTY_HASH is for tree of height 64 and  recalculating this hash
       // in tests on slower machines (e.g. CI) makes test flakey async-wise.
@@ -54,7 +56,8 @@ describe(StateUpdateCollector.name, () => {
         mock<StateUpdateRepository>(),
         mock<RollupStateRepository>(),
         mock<EthereumClient>(),
-        mock<ForcedTransactionsRepository>()
+        mock<ForcedTransactionsRepository>(),
+        Logger.SILENT
       )
       const hash = PedersenHash.fake()
       const rollupState = await stateUpdateCollector.ensureRollupState(hash)
@@ -67,7 +70,8 @@ describe(StateUpdateCollector.name, () => {
         mock<StateUpdateRepository>(),
         mock<RollupStateRepository>(),
         mock<EthereumClient>(),
-        mock<ForcedTransactionsRepository>()
+        mock<ForcedTransactionsRepository>(),
+        Logger.SILENT
       )
       const hashA = PedersenHash.fake('a')
       const hashB = PedersenHash.fake('b')
@@ -83,7 +87,8 @@ describe(StateUpdateCollector.name, () => {
         mock<StateUpdateRepository>(),
         mock<RollupStateRepository>(),
         mock<EthereumClient>(),
-        mock<ForcedTransactionsRepository>()
+        mock<ForcedTransactionsRepository>(),
+        Logger.SILENT
       )
       const hash = PedersenHash.fake()
       const rollupStateA = await stateUpdateCollector.ensureRollupState(hash)
@@ -102,7 +107,8 @@ describe(StateUpdateCollector.name, () => {
         mock<StateUpdateRepository>(),
         mock<RollupStateRepository>(),
         mock<EthereumClient>(),
-        mock<ForcedTransactionsRepository>()
+        mock<ForcedTransactionsRepository>(),
+        Logger.SILENT
       )
       expect(
         stateUpdateCollector.save([{ hash: Hash256.fake('a'), blockNumber: 1 }])
@@ -130,7 +136,8 @@ describe(StateUpdateCollector.name, () => {
         stateUpdateRepository,
         mock<RollupStateRepository>(),
         mock<EthereumClient>(),
-        mock<ForcedTransactionsRepository>()
+        mock<ForcedTransactionsRepository>(),
+        Logger.SILENT
       )
       const processStateTransition = mockFn().resolvesTo(undefined)
       stateUpdateCollector.processStateTransition = processStateTransition
@@ -173,6 +180,7 @@ describe(StateUpdateCollector.name, () => {
           },
         }),
         mock<ForcedTransactionsRepository>(),
+        Logger.SILENT,
         rollupState
       )
       rollupState.positions.hash = mock(async () => '1234')
@@ -197,7 +205,8 @@ describe(StateUpdateCollector.name, () => {
         stateUpdateRepository,
         mock<RollupStateRepository>(),
         mock<EthereumClient>(),
-        mock<ForcedTransactionsRepository>()
+        mock<ForcedTransactionsRepository>(),
+        Logger.SILENT
       )
 
       await stateUpdateCollector.discardAfter(20)
@@ -221,7 +230,8 @@ describe(StateUpdateCollector.name, () => {
         mock<StateUpdateRepository>(),
         mock<RollupStateRepository>(),
         mock<EthereumClient>(),
-        forcedTransactionsRepository
+        forcedTransactionsRepository,
+        Logger.SILENT
       )
 
       expect(
